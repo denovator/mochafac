@@ -25,7 +25,7 @@ def article_create():
             title=article_data.get('title'),
             author=article_data.get('author'),
             category=article_data.get('category'),
-            context=article_data.get('context')
+            content=article_data.get('content')
         )
 
         db.session.add(article)
