@@ -1,4 +1,4 @@
-# _*_ enctype=utf-8 _*_
+# -*- coding: utf-8 -*-
 from flask import render_template, request, redirect, url_for, flash
 from sqlalchemy import desc
 from app import app, db
