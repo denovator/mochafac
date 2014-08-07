@@ -76,6 +76,24 @@ def comment_create(article_id):
             return redirect(url_for('article_detail', id=article_id))
         return render_template('article/create.html', form=form)
 
+######################################################################
+#코멘트지우기 연습중
+@app.route('/comment/delete/<int:id>', methods=['GET', 'POST'])
+def comment_delete(id):
+    if request.method == 'GET':
+        return render_template('comment/delete.html', article_id=id)
+    elif request.method == 'POST':
+        article_id = request.form['article_id']
+        article = Article.query.get(article_id)
+        db.session.delete(article)
+        db.session.commit()
+
+        flash(u'댓글을 삭제하였습니다.', 'success')
+        return redirect(url_for('article_list'))
+
+######################################################################
+
+
 
 @app.route('/article/update/<int:id>', methods=['GET', 'POST'])
 def article_update(id):

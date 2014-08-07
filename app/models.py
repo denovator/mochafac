@@ -9,6 +9,7 @@ class Article(db.Model):
     author = db.Column(db.String(255))
     category = db.Column(db.String(255))
     date_created = db.Column(db.DateTime(), default=db.func.now())
+    like_count = db.Column(db.Integer)
 
 
 class Comment(db.Model):
