@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from flask import render_template, request, redirect, url_for, flash
+from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import desc
 from app import app, db
-from app.forms import ArticleForm, CommentForm
-from app.models import Article, Comment
+from app.forms import ArticleForm, CommentForm, JoinForm
+from app.models import Article, Comment, User
 import sys
 reload(sys)
 sys.setdefaultencoding('UTF8')
@@ -16,6 +17,33 @@ def article_list():
         desc(Article.date_created)).all()
 
     return render_template('home.html', context=context, active_tab='article_list')
+
+
+@app.route('/user/join/', methods=['GET', 'POST'])
+def user_join():
+    form = JoinForm()
+    if request.method == 'GET':
+        return render_template('user/join.html', form=form, active_tab='user_join')
+    elif request.method == 'POST':
+        if form.validate_on_submit():
+            if db.session.query(User).filter(User.email == form.email.data).count() > 0:
+                flash(u'이미 가입된 이메일입니다.', 'danger')
+                return render_template('user/join.html', form=form, acive_tab='user_join')
+            # 사용자가 입력한 글 데이터로 User모델 인스턴스 생성
+            else:
+                user = User(
+                    email=form.email.data,
+                    password=generate_password_hash(form.password.data),
+                    name=form.name.data
+                )
+                # 데이터베이스에 데이터를 저장할 준비를 한다
+                db.session.add(user)
+                # 데이터베이스에 저장하라는 명령을 한다
+                db.session.commit()
+
+                flash(u'회원가입을 완료하였습니다.' 'success')
+                return redirect(url_for('user_join'))
+        return render_template('user/join.html', form=form, active_tab='user_join')
 
 
 @app.route('/article/create/', methods=['GET', 'POST'])
@@ -76,8 +104,10 @@ def comment_create(article_id):
             return redirect(url_for('article_detail', id=article_id))
         return render_template('article/create.html', form=form)
 
-######################################################################
-#코멘트지우기 연습중
+#
+# 코멘트지우기 연습중
+
+
 @app.route('/comment/delete/<int:id>', methods=['GET', 'POST'])
 def comment_delete(id):
     if request.method == 'GET':
@@ -91,8 +121,7 @@ def comment_delete(id):
         flash(u'댓글을 삭제하였습니다.', 'success')
         return redirect(url_for('article_list'))
 
-######################################################################
-
+#
 
 
 @app.route('/article/update/<int:id>', methods=['GET', 'POST'])
