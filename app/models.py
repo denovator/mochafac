@@ -2,6 +2,14 @@
 from app import db
 
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255))
+    password = db.Column(db.String(255))
+    name = db.Column(db.String(255))
+    join_date = db.Column(db.DateTime(), default=db.func.now())
+
+
 class Article(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255))
