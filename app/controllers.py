@@ -22,7 +22,7 @@ def before_request():
 def article_list():
     context = {}
     context['article_list'] = Article.query.order_by(
-        desc(Article.date_created)).limit(3)
+        desc(Article.date_created)).limit(2)
 
     return render_template('home.html', context=context, active_tab='article_list')
 
@@ -31,6 +31,29 @@ def article_list():
 def article_count():
     count = db.session.query(Article).count()
     return jsonify(count=count)
+
+
+@app.route('/ajax/article_more')
+def article_more():
+    current_row = int(request.args.get('current_row'))
+    row = int(request.args.get('count'))
+    more_data = db.session.query(Article).order_by(
+        desc(Article.date_created))[current_row:current_row + 2]
+    resp = {}
+    resp["data"] = []
+    temp = {}
+    for article in more_data:
+        temp['id'] = article.id
+        temp['title'] = article.title
+        temp['content'] = article.content
+        temp['author'] = article.author
+        temp['category'] = article.category
+        temp['date_created'] = article.date_created
+
+        resp['data'].append(temp)
+        temp = {}
+
+    return jsonify(resp)
 
 
 @app.route('/user/login', methods=['GET', 'POST'])
