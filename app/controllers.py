@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import render_template, request, redirect, url_for, flash, g, session
+from flask import render_template, request, redirect, url_for, flash, g, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import desc
 from app import app, db
@@ -22,9 +22,15 @@ def before_request():
 def article_list():
     context = {}
     context['article_list'] = Article.query.order_by(
-        desc(Article.date_created)).all()
+        desc(Article.date_created)).limit(3)
 
     return render_template('home.html', context=context, active_tab='article_list')
+
+
+@app.route('/ajax/article_count')
+def article_count():
+    count = db.session.query(Article).count()
+    return jsonify(count=count)
 
 
 @app.route('/user/login', methods=['GET', 'POST'])
@@ -37,9 +43,9 @@ def user_login():
         if form.validate_on_submit():
             email = form.email.data
             pw = form.password.data
-            
+
             user = db.session.query(User).filter(User.email == email).first()
-            
+
             if user and check_password_hash(user.password, pw):
                 session['user_name'] = email
                 flash(u'이메일 맞네?', 'success')

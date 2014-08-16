@@ -1,24 +1,29 @@
 {% extends "layout.html" %}
 
 {% block contents %}
-    <div class="llArticleList">
-        {% if context.article_list %}
-            {% for article in context.article_list %}
-                <div class="well" id="article_{{ article.id }}">
-                    <h1><a href="{{ url_for('article_detail', id=article.id) }}">{{ article.title }}</a></h1>
-                    <h3>{{ article.author }}</h3>
-                    <h6>{{ article.date_created.strftime('%Y-%m-%d %H:%M:%S') }}</h6>
+<div class="llArticleList">
+    <div id="more">총 게시물 수 : </div>
+    {% if context.article_list %}
+    {% for article in context.article_list %}
+    <div class="well" id="article_{{ article.id }}">
+        <h1><a href="{{ url_for('article_detail', id=article.id) }}">{{ article.title }}</a></h1>
+        <h3>{{ article.author }}</h3>
+        <h6>{{ article.date_created.strftime('%Y-%m-%d %H:%M:%S') }}</h6>
 
-                    <p>
-                        {{ article.content|truncate(50)|safe }}
-                    </p>
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="no-list">
-                글이 존재하지 않습니다. 새로운 글을 등록해주세요.
-            </div>
-        {% endif %}
+        <p>
+            {{ article.content|truncate(50)|safe }}
+        </p>
     </div>
+    {% endfor %}
+    <div class="row">
+        <div class="col-sm-12" id="more_data"></div>
+        <div class="col-sm-12"><button class="btn btn-default" id="more_btn">더 보기</button></div>
+    </div>
+    {% else %}
+    <div class="no-list">
+        글이 존재하지 않습니다. 새로운 글을 등록해주세요.
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
 
