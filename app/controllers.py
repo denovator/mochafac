@@ -1,13 +1,21 @@
 # -*- coding: utf-8 -*-
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, g, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import desc
 from app import app, db
-from app.forms import ArticleForm, CommentForm, JoinForm
+from app.forms import ArticleForm, CommentForm, JoinForm, LoginForm
 from app.models import Article, Comment, User
 import sys
 reload(sys)
 sys.setdefaultencoding('UTF8')
+
+
+@app.before_request
+def before_request():
+    g.user_name = None
+
+    if 'user_name' in session:
+        g.user_name = session['user_name']
 
 
 @app.route('/', methods=['GET'])
@@ -17,6 +25,49 @@ def article_list():
         desc(Article.date_created)).all()
 
     return render_template('home.html', context=context, active_tab='article_list')
+
+
+@app.route('/user/login', methods=['GET', 'POST'])
+def user_login():
+    form = LoginForm()
+
+    if request.method == 'GET':
+        return render_template('user/login.html', form=form, active_tab='user_login')
+    elif request.method == 'POST':
+        if form.validate_on_submit():
+            email = form.email.data
+            pw = form.password.data
+            
+            user = db.session.query(User).filter(User.email == email).first()
+            
+            if user and check_password_hash(user.password, pw):
+                session['user_name'] = email
+                flash(u'이메일 맞네?', 'success')
+                return redirect(url_for('article_list'))
+            else:
+                flash(u'이메일 안맞네?', 'danger')
+                return redirect(url_for('user_login'))
+        return render_template('user/login.html', form=form, active_tab='user_login')
+
+# if db.session.query(User).filter(User.email == email).first()
+# None이면 유저가 없는것
+
+
+# Session
+# @app.route('/login', methods=['POST'])
+# def login():
+#     id = request.form['id']
+#     pw = request.form['pw']
+
+#     session['user_id'] = id
+
+#     return redirect(url_for('index'))
+
+
+@app.route('/user/logout')
+def user_logout():
+    session.clear()
+    return redirect(url_for('article_list'))
 
 
 @app.route('/user/join/', methods=['GET', 'POST'])

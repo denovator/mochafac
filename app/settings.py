@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
+from datetime import timedelta
+
+
 class Config(object):
     SECRET_KEY = "asdfjlsadjflkjlwkqjerljlasdjfl"
     debug = False
+    PERMANENT_SESSION_LIFETIME = timedelta(days=1)
 
 
 class Production(Config):
